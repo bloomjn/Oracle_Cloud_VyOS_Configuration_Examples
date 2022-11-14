@@ -1,0 +1,87 @@
+# OCI_IPSEC_CPE_1
+
+FIND and REPLACE these Variables
+
+S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 (Site-to-Site VPN Public IP for OCI, Tunnel 1)
+S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 (Site-to-Site VPN Public IP for OCI, Tunnel 2)
+S2S_VPN_CPE1_PUB_IP (Reserved Public IP on vNIC1)
+CPE1_ETH1_PRIVATE_IP (Reserved Private IP on vNIC1)
+OCI_PRIVATE_KEY (Pre-Shared Key that will be used to authenticate the session)
+
+#RUN THIS TO RESET THE VPN CONFIG
+conf
+delete proto bgp
+delete vpn
+delete protocols static
+delete interfaces vti vti1001
+delete interfaces vti vti2001
+commit;save;exit
+
+
+**#VyOS Configuration CPE#1**
+
+**#VyOS Configuration CPE#1 (TUNNEL_#.CPENUMBER.SITENUMBER.HOSTID)**
+
+set interfaces vti vti1001 address '1.1.0.0/31'
+set interfaces vti vti1001 description HUB_1_Tunnel_1
+set interfaces vti vti2001 address '2.1.0.0/31'
+set interfaces vti vti2001 description HUB_1_Tunnel_2
+
+#Phase 1 Configuration
+set vpn ipsec ike-group IKE_ORACLE close-action 'none'
+set vpn ipsec ike-group IKE_ORACLE dead-peer-detection action 'restart'
+set vpn ipsec ike-group IKE_ORACLE dead-peer-detection interval '20'
+set vpn ipsec ike-group IKE_ORACLE ikev2-reauth 'no'
+set vpn ipsec ike-group IKE_ORACLE key-exchange 'ikev2'
+set vpn ipsec ike-group IKE_ORACLE lifetime '28800'
+set vpn ipsec ike-group IKE_ORACLE mobike 'disable'
+set vpn ipsec ike-group IKE_ORACLE proposal 1 dh-group '20'
+set vpn ipsec ike-group IKE_ORACLE proposal 1 encryption 'aes256'
+set vpn ipsec ike-group IKE_ORACLE proposal 1 hash 'sha384'
+
+#Phase 2 Configuration
+set vpn ipsec esp-group ESP_ORACLE compression 'disable'
+set vpn ipsec esp-group ESP_ORACLE lifetime '3600'
+set vpn ipsec esp-group ESP_ORACLE mode 'tunnel'
+set vpn ipsec esp-group ESP_ORACLE pfs 'enable'
+set vpn ipsec esp-group ESP_ORACLE pfs dh-group5
+set vpn ipsec esp-group ESP_ORACLE proposal 1 encryption 'aes256gcm128'
+
+#OCI IPSEC WAN Interface
+set vpn ipsec ipsec-interfaces interface 'eth1'
+
+#Peer Specific Configuration per OCI tunnel on the VyOS Router
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 authentication id 'S2S_VPN_CPE1_PUB_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 authentication pre-shared-secret 'OCI_PRIVATE_KEY'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 authentication remote-id 'S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 connection-type 'initiate'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 ike-group 'IKE_ORACLE'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 ikev2-reauth 'no'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 local-address 'CPE1_ETH1_PRIVATE_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 vti bind 'vti1001'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 vti esp-group 'ESP_ORACLE'
+
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 authentication id 'S2S_VPN_CPE1_PUB_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 authentication pre-shared-secret 'OCI_PRIVATE_KEY'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 authentication remote-id 'S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 connection-type 'initiate'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 ike-group 'IKE_ORACLE'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 ikev2-reauth 'no'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 local-address 'CPE1_ETH1_PRIVATE_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti bind 'vti2001'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti esp-group 'ESP_ORACLE'
+
+#BGP Config
+set protocols static interface-route 1.1.0.1/32 next-hop-interface vti1001
+set protocols bgp 65500 neighbor 1.1.0.1 remote-as '31898'
+set protocols bgp 65500 neighbor 1.1.0.1 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp 65500 neighbor 1.1.0.1 timers holdtime 15
+set protocols bgp 65500 neighbor 1.1.0.1 timers keepalive 5
+set protocols bgp 65500 neighbor 1.1.0.1 disable-connected-check
+
+set protocols static interface-route 2.1.0.1/32 next-hop-interface vti2001
+set protocols bgp 65500 neighbor 2.1.0.1 remote-as '31898'
+set protocols bgp 65500 neighbor 2.1.0.1 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp 65500 neighbor 2.1.0.1 timers holdtime 15
+set protocols bgp 65500 neighbor 2.1.0.1 timers keepalive 5
+set protocols bgp 65500 neighbor 2.1.0.1 disable-connected-check
