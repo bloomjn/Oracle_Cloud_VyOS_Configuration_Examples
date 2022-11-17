@@ -1,11 +1,9 @@
-# OCI_IPSEC_CPE_1
-
 FIND and REPLACE these Variables
 
 S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 (Site-to-Site VPN Public IP for OCI, Tunnel 1)
 S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 (Site-to-Site VPN Public IP for OCI, Tunnel 2)
-S2S_VPN_CPE1_PUB_IP (Reserved Public IP on vNIC1)
-CPE1_ETH1_PRIVATE_IP (Reserved Private IP on vNIC1)
+S2S_VPN_CPE1_PUB_IP (Reserved Public IP on vNIC0)
+CPE1_ETH0_PRIVATE_IP (Reserved Private IP on vNIC0)
 OCI_PRIVATE_KEY (Pre-Shared Key that will be used to authenticate the session)
 
 #RUN THIS TO RESET THE VPN CONFIG
@@ -57,7 +55,7 @@ set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 authentication re
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 connection-type 'initiate'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 ike-group 'IKE_ORACLE'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 ikev2-reauth 'no'
-set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 local-address 'CPE1_ETH1_PRIVATE_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 local-address 'CPE1_ETH0_PRIVATE_IP'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 vti bind 'vti1001'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_1 vti esp-group 'ESP_ORACLE'
 
@@ -67,7 +65,7 @@ set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 authentication re
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 connection-type 'initiate'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 ike-group 'IKE_ORACLE'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 ikev2-reauth 'no'
-set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 local-address 'CPE1_ETH1_PRIVATE_IP'
+set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 local-address 'CPE1_ETH0_PRIVATE_IP'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti bind 'vti2001'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti esp-group 'ESP_ORACLE'
 
