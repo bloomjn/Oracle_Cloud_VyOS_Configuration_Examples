@@ -69,7 +69,8 @@ set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 local-address 'CP
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti bind 'vti2001'
 set vpn ipsec site-to-site peer S2S_VPN_OCI_PUB_IP_CPE_1_TUN_2 vti esp-group 'ESP_ORACLE'
 
-#BGP Config
+
+#Routing Config (Static and BGP)
 set protocols static interface-route 1.1.0.1/32 next-hop-interface vti1001
 set protocols bgp 65500 neighbor 1.1.0.1 remote-as '31898'
 set protocols bgp 65500 neighbor 1.1.0.1 address-family ipv4-unicast soft-reconfiguration inbound
